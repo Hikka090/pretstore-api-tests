@@ -1,3 +1,6 @@
+Тестовое задание.
+
+
 Автотесты Petstore API
 
 Автотесты для API сервиса PetStore (https://petstore.swagger.io)

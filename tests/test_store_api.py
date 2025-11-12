@@ -6,10 +6,8 @@ class TestStoreAPI:
     
     def test_get_inventory(self, api_client):
         """Тест получения инвентаря - этот endpoint работает надежно"""
-        # Act
         response = api_client.get_inventory()
         
-        # Assert
         assert response.status_code == 200
         inventory = response.json()
         
@@ -27,10 +25,9 @@ class TestStoreAPI:
     
     def test_create_order_success(self, api_client, random_order_data):
         """Тест успешного создания заказа - проверяем только ответ создания"""
-        # Act
+
         response = api_client.create_order(random_order_data)
         
-        # Assert
         assert response.status_code == 200
         created_order = response.json()
         
@@ -41,23 +38,22 @@ class TestStoreAPI:
     
     def test_get_order_behavior(self, api_client):
         """Тест поведения GET /order/{id}"""
-        # Act - пробуем получить несуществующий заказ
+        # Пробуем получить несуществующий заказ
         response = api_client.get_order_by_id(999999999)
         
-        # Assert - PetStore возвращает 404 для несуществующих заказов
+        # PetStore возвращает 404 для несуществующих заказов
         assert response.status_code == 404
     
     def test_delete_order_behavior(self, api_client):
         """Тест поведения DELETE /order/{id}"""
-        # Act - пробуем удалить несуществующий заказ
+        # Пробуем удалить несуществующий заказ
         response = api_client.delete_order(999999999)
         
-        # Assert - PetStore возвращает 404 для несуществующих заказов
+        # PetStore возвращает 404 для несуществующих заказов
         assert response.status_code == 404
     
     def test_create_order_with_minimal_data(self, api_client):
         """Тест создания заказа с минимальными данными"""
-        # Arrange
         minimal_order = {
             "id": 1,
             "petId": 1,
@@ -66,10 +62,8 @@ class TestStoreAPI:
             "complete": True
         }
         
-        # Act
         response = api_client.create_order(minimal_order)
         
-        # Assert
         assert response.status_code == 200
         order_data = response.json()
         assert order_data["status"] == "placed"
