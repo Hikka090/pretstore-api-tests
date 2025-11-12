@@ -12,7 +12,6 @@ class PetStoreAPI:
     def __init__(self, base_url: str = "https://petstore.swagger.io/v2"):
         self.base_url = base_url
         self.session = requests.Session()
-        # Можно добавить общие заголовки здесь
         self.session.headers.update({
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -24,14 +23,21 @@ class PetStoreAPI:
         Централизованная обработка ошибок и логирование.
         """
         url = f"{self.base_url}{endpoint}"
-        print(f"Making {method.upper()} request to: {url}")  # Для дебага
+        print(f"🚀 Making {method.upper()} request to: {url}")
+        if kwargs.get('json'):
+            print(f"📦 Request body: {json.dumps(kwargs['json'], indent=2)}")
         
         try:
             response = self.session.request(method, url, **kwargs)
-            print(f"Response status: {response.status_code}")
+            print(f"📡 Response status: {response.status_code}")
+            if response.content:
+                try:
+                    print(f"📥 Response body: {json.dumps(response.json(), indent=2)}")
+                except:
+                    print(f"📥 Response body: {response.text}")
             return response
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
+            print(f"❌ Request failed: {e}")
             raise
     
     # === PET ENDPOINTS ===
@@ -48,9 +54,20 @@ class PetStoreAPI:
         """PUT /pet - Обновление существующего питомца"""
         return self._make_request("PUT", "/pet", json=pet_data)
     
-    def delete_pet(self, pet_id: int) -> requests.Response:
+    # def update_pet_with_form_data(self, pet_id: int, name: str = None, status: str = None) -> requests.Response:
+    #    """POST /pet/{petId} - Обновление питомца с form data"""
+    #    data = {}
+    #    if name:
+    #        data['name'] = name
+    #    if status:
+    #        data['status'] = status
+    #    
+    #    return self._make_request("POST", f"/pet/{pet_id}", data=data)
+    
+    def delete_pet(self, pet_id: int, api_key: str = "special-key") -> requests.Response:
         """DELETE /pet/{petId} - Удаление питомца"""
-        return self._make_request("DELETE", f"/pet/{pet_id}")
+        headers = {"api_key": api_key}
+        return self._make_request("DELETE", f"/pet/{pet_id}", headers=headers)
     
     def find_pets_by_status(self, status: str) -> requests.Response:
         """GET /pet/findByStatus - Поиск питомцев по статусу"""
@@ -84,6 +101,10 @@ class PetStoreAPI:
         """GET /user/{username} - Получение пользователя по имени"""
         return self._make_request("GET", f"/user/{username}")
     
+    def get_user_by_userdata(self, username: str) -> requests.Response:
+        """GET /user/{username} - Получение пользователя по имени (alias для consistency)"""
+        return self.get_user_by_username(username)
+    
     def update_user(self, username: str, user_data: Dict[str, Any]) -> requests.Response:
         """PUT /user/{username} - Обновление пользователя"""
         return self._make_request("PUT", f"/user/{username}", json=user_data)
@@ -95,3 +116,4 @@ class PetStoreAPI:
     def create_users_with_list(self, users_list: list) -> requests.Response:
         """POST /user/createWithList - Создание пользователей из списка"""
         return self._make_request("POST", "/user/createWithList", json=users_list)
+    

@@ -13,7 +13,9 @@ def api_client():
 @pytest.fixture
 def random_pet_data():
     """Фикстура генерирует случайные данные для питомца"""
-    pet_id = random.randint(1000, 9999)
+    # Используем микросекунды для большей уникальности
+    timestamp = int(time.time() * 1000000) % 10000000
+    pet_id = 10000000 + timestamp
     return {
         "id": pet_id,
         "category": {"id": 1, "name": "dogs"},
@@ -27,9 +29,10 @@ def random_pet_data():
 @pytest.fixture
 def random_order_data():
     """Фикстура генерирует случайные данные для заказа"""
+    timestamp = int(time.time() * 1000000) % 10000000
     return {
-        "id": random.randint(1, 1000),
-        "petId": random.randint(1000, 9999),
+        "id": 20000000 + timestamp,
+        "petId": 30000000 + timestamp,
         "quantity": 1,
         "shipDate": "2023-12-01T10:00:00.000Z",
         "status": "placed",
@@ -40,7 +43,8 @@ def random_order_data():
 @pytest.fixture
 def random_user_data():
     """Фикстура генерирует случайные данные для пользователя"""
-    user_id = random.randint(100, 999)
+    timestamp = int(time.time() * 1000000) % 10000000
+    user_id = 40000000 + timestamp
     return {
         "id": user_id,
         "username": f"testuser{user_id}",
@@ -53,21 +57,8 @@ def random_user_data():
     }
 
 
-@pytest.fixture
-def created_pet(api_client, random_pet_data):
-    """
-    Фикстура создает питомца перед тестом и удаляет после.
-    Пример фикстуры с setup/teardown.
-    """
-    # Setup - создаем питомца
-    response = api_client.create_pet(random_pet_data)
-    assert response.status_code == 200
-    pet_id = response.json()["id"]
-    
-    yield pet_id  # Это значение передается в тест
-    
-    # Teardown - удаляем питомца после теста
-    try:
-        api_client.delete_pet(pet_id)
-    except:
-        pass  # Игнорируем ошибки при удалении в teardown
+@pytest.fixture(autouse=True)
+def slow_down_tests():
+    """Замедляет тесты чтобы избежать rate limiting"""
+    yield
+    time.sleep(1)  # Увеличим паузу до 1 секунды
